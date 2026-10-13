@@ -1,0 +1,813 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1" name="viewport"/>
+  <title>
+   The Stranger — Showcase
+  </title>
+  <style>
+:root {
+  font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  color:#161e2b;
+  background:#fbfaf8;
+}
+* {
+  box-sizing:border-box;
+}
+body {
+  margin:0;
+}
+.wrap {
+  max-width:1450px;
+  margin:auto;
+  padding:48px 50px 70px;
+}
+h1 {
+  font:normal clamp(42px,4.7vw,68px)/1.08 Georgia,"Times New Roman",serif;
+  letter-spacing:-.055em;
+  margin:0 0 9px;
+  color:#111a29;
+}
+.layout {
+  display:grid;
+  grid-template-columns:minmax(0,1.62fr) minmax(365px,1fr);
+  gap:22px;
+  align-items:stretch;
+}
+.sheet,.side {
+  background:#fffefa;
+  border:1px solid #dcdfe4;
+  border-radius:11px;
+  box-shadow:none;
+}
+.sheet {
+  min-height:690px;
+  padding:40px 42px;
+  display:flex;
+  flex-direction:column;
+}
+.topline {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin-bottom:42px;
+  color:#637590;
+  font-size:13px;
+}
+.topline span:first-child {
+  letter-spacing:.15em;
+  font-size:12px;
+  font-weight:600;
+}
+.poem {
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:clamp(25px,2.85vw,40px);
+  line-height:2.25;
+  letter-spacing:-.025em;
+  flex:1;
+  padding:1px 0 36px;
+  overflow-wrap:anywhere;
+}
+.token {
+  display:inline;
+  border:0;
+  background:#e7f1ff;
+  color:#1267c8;
+  padding:1px 7px 3px;
+  border-radius:6px;
+  font:inherit;
+  line-height:1.3;
+  cursor:pointer;
+  text-decoration:underline dotted;
+  text-underline-offset:8px;
+  text-decoration-thickness:1px;
+  transition:background .14s;
+}
+.token:hover,.token.active {
+  background:#dceaff;
+  outline:1px solid #a3c5f9;
+  outline-offset:1px;
+}
+.token.locked {
+  background:#eaf3ff;
+  color:#1268c6;
+}
+.token.impossible {
+  opacity:.5;
+}
+.side {
+  padding:31px;
+  position:sticky;
+  top:20px;
+  align-self:start;
+  min-width:0;
+}
+.side h2 {
+  font:normal 31px/1.15 Georgia,"Times New Roman",serif;
+  letter-spacing:-.04em;
+  margin:0 0 6px;
+}
+.toolbar {
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin:22px 0 0;
+}
+button.action {
+  border:1px solid #d1dae6;
+  border-radius:8px;
+  background:transparent;
+  color:#33445c;
+  padding:11px 17px;
+  cursor:pointer;
+  font-size:13px;
+  font-weight:550;
+}
+button.action:hover {
+  background:#f3f7fc;
+}
+.primary {
+  background:#3c74ba!important;
+  color:white!important;
+  border-color:#3c74ba!important;
+}
+.context {
+  margin-top:13px;
+  font-size:13px;
+  color:#65738b;
+  line-height:1.5;
+  border:none;
+  background:none;
+  padding:0;
+}
+.choicegrid {
+  margin-top:23px;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+.opt {
+  border:1px solid #dfe5ee;
+  background:#fff;
+  border-radius:9px;
+  padding:15px 17px;
+  cursor:pointer;
+  text-align:left;
+  color:#253650;
+  min-width:0;
+}
+.opt strong {
+  font:normal 20px/1.3 Georgia,"Times New Roman",serif;
+  display:block;
+  overflow-wrap:anywhere;
+}
+.opt span {
+  display:block;
+  font-size:13px;
+  color:#72829b;
+  margin-top:5px;
+}
+.opt:hover {
+  border-color:#6e9ddc;
+  background:#f8fbff;
+}
+.opt.sel {
+  border-color:#347beb;
+  background:#eaf3ff;
+}
+.opt.forced {
+  border-color:#347beb;
+  background:#fff;
+}
+.opt:disabled {
+  opacity:.38;
+  cursor:not-allowed;
+}
+.bar {
+  height:5px;
+  border-radius:5px;
+  background:#e9edf3;
+  overflow:hidden;
+  margin-top:12px;
+}
+.bar i {
+  height:100%;
+  display:block;
+  background:#5994df;
+}
+.matrix-title {
+  margin-top:34px;
+  font:normal 22px Georgia,"Times New Roman",serif;
+  color:#172235;
+}
+.matrix-scroll {
+  overflow-x:auto;
+  margin-top:15px;
+}
+.matrix {
+  border-collapse:collapse;
+  font-size:12px;
+  width:100%;
+  table-layout:auto;
+}
+.matrix th {
+  font-weight:500;
+  color:#637790;
+  padding:10px 6px;
+  background:#f7f8fa;
+  border:1px solid #e8ebf0;
+  overflow-wrap:anywhere;
+}
+.matrix td {
+  border:1px solid #e8ebf0;
+  text-align:center;
+  height:40px;
+  padding:10px 6px;
+  color:#2067bb;
+  font-size:12px;
+  background:#f8fbff;
+}
+.matrix td.zero {
+  color:#a6b0bf;
+  background:#fcfcfd;
+}
+.side .small:empty {
+  display:none;
+}
+@media(max-width:950px) {
+  .wrap {
+    padding:27px 20px;
+  }
+  .layout {
+    grid-template-columns:1fr;
+  }
+  .side {
+    position:static;
+  }
+  .sheet {
+    min-height:430px;
+    padding:30px;
+  }
+  .poem {
+    font-size:clamp(24px,5vw,36px);
+  }
+}
+@media(max-width:500px) {
+  .wrap {
+    padding:20px 12px;
+  }
+  .sheet,.side {
+    padding:21px;
+  }
+  .choicegrid {
+    gap:8px;
+  }
+  .opt {
+    padding:12px;
+  }
+  .poem {
+    font-size:25px;
+    line-height:2.1;
+  }
+  .topline {
+    margin-bottom:23px;
+  }
+}
+.privacy-subtitle {
+  margin:7px 0 25px;
+  color:#68788b;
+  font-size:14px;
+  letter-spacing:.005em;
+}
+.heading-row {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+}
+.matrix-heading {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin-top:34px;
+}
+.matrix-heading .matrix-title { margin-top:0; }
+.matrix-view {
+  display:flex;
+  border:1px solid #d1dae6;
+  border-radius:6px;
+  overflow:hidden;
+  flex-shrink:0;
+}
+.matrix-view button {
+  padding:6px 10px;
+  border:0;
+  background:transparent;
+  color:#5b6d82;
+  font:12px system-ui;
+  cursor:pointer;
+}
+.matrix-view button + button { border-left:1px solid #d1dae6; }
+.matrix-view button[aria-pressed="true"] {
+  background:#e7f1ff;
+  color:#1267c8;
+}
+.matrix tr.current-row th,
+.matrix tr.current-row td {
+  background:#e2efff;
+}
+.matrix th.current-column,
+.matrix td.current-column {
+  background:#e2efff;
+  color:#125db0;
+}
+@media(max-width:500px) {
+  .matrix-heading { align-items:flex-start; flex-wrap:wrap; }
+}
+.reader-author {
+  margin-top:5px;
+  font-size:12px;
+  letter-spacing:normal;
+}
+</style>
+ </head>
+ <body>
+  <main class="wrap">
+   <div class="heading-row">
+    <h1>The Stranger — Showcase</h1>
+   </div>
+   <p class="privacy-subtitle" aria-hidden="true">&nbsp;</p>
+   <div id="reader">
+    <div class="layout">
+     <section class="sheet">
+      <div class="topline">
+       <div><span id="reader-title">UNTITLED</span><div class="reader-author" id="reader-author" hidden></div></div>
+       <span id="state-label"></span>
+      </div>
+      <div class="poem" id="poem">
+      </div>
+      <div class="toolbar">
+       <button class="action primary" id="sample">Sample</button>
+       <button class="action" id="clear">Reset</button>
+       <button class="action" id="copy">Copy reading</button>
+      </div>
+     </section>
+     <aside class="side">
+      <h2 id="panel-title">Superposition</h2>
+      <div class="small" id="panel-intro">
+      </div>
+      <div class="context" id="context">
+      </div>
+      <div id="options">
+      </div>
+      <div id="matrix">
+      </div>
+     </aside>
+    </div>
+   </div>
+   </main>
+   <script>
+const $ = id => document.getElementById(id);
+const doc = {
+  "title": "The Stranger",
+  "template": "I met a man from foreign lands,\nwho spoke of home and winter rain. \nHe told his tale with weathered hands;\nI knew his times of joy and pain.\n\nI watched his face, thinking of lies, \nas we met {1} that night.\nHe raised his hand before my eyes.\nI {2} to end his blight.\n\nThey asked me what that man had said\nand how I had chosen my way,\nAs for the man whose companionship I fled,\nI called him a {3} that day.",
+  "positions": [
+    {
+      "words": [
+        "at the inn",
+        "across the trenches"
+      ],
+      "weights": [
+        0.95,
+        0.05
+      ],
+      "dependsOn": []
+    },
+    {
+      "words": [
+        "passed a pint",
+        "shot his chest"
+      ],
+      "dependsOn": [
+        0
+      ],
+      "weights": [
+        [
+          0.9999,
+          0.0001
+        ],
+        [
+          0.3,
+          0.7
+        ]
+      ]
+    },
+    {
+      "words": [
+        "friend",
+        "foe"
+      ],
+      "dependsOn": [
+        0,
+        1
+      ],
+      "weights": [
+        [
+          0.9,
+          0.1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0.1,
+          0.9
+        ],
+        [
+          0.1,
+          0.9
+        ]
+      ]
+    }
+  ],
+  "author": "arkendor"
+};
+
+// Document structure and dependency indexing.
+const MAX_ROWS = 10000;
+
+class ImpossibleEvidenceError extends Error {
+  constructor() {
+    super('These selections cannot occur together.');
+    this.name = 'ImpossibleEvidenceError';
+  }
+}
+
+function depsFor(d, i){
+  const pos=d.positions[i];
+  if(Array.isArray(pos.dependsOn))return pos.dependsOn;
+  if(i===0)return [];
+  if(pos.dependsOn===-2)return Array.from({
+    length:i
+  }, (_, k)=>k);
+  if(Number.isInteger(pos.dependsOn))return [pos.dependsOn];
+  return [i-1]
+}
+function dependencies(i){
+  return depsFor(doc, i)
+}
+function rowsFor(d, i){
+  const p=d.positions[i];
+  return i===0&&!depsFor(d, i).length?[p.weights]:p.weights
+}
+function topologicalOrder(d){
+  const order=[], state=d.positions.map(()=>0);
+  function visit(i){
+    if(state[i]===1)throw Error('Circular dependencies are not allowed.');
+    if(state[i]===2)return;
+    state[i]=1;
+    for(const parent of depsFor(d, i))visit(parent);
+    state[i]=2;
+    order.push(i)
+  }
+  d.positions.forEach((_, i)=>visit(i));
+  return order
+}
+let selected=doc.positions.map(()=>null), active=0;
+let matrixView="active";
+
+function norm(r){
+  const s=r.reduce((a, b)=>a+b, 0);
+  return r.map(v=>v/s)
+}
+function reset(){
+  selected=doc.positions.map(()=>null);
+  active=Math.max(0, Math.min(active, doc.positions.length-1))
+}
+function rowId(i, history){
+  let result=0;
+  for(const k of dependencies(i))result=result*doc.positions[k].words.length+history[k];
+  return result
+}
+function rowSelections(i, r){
+  const ds=dependencies(i), chosen={
+  };
+  for(let k=ds.length-1; k>=0; k--){
+    const dep=ds[k], count=doc.positions[dep].words.length;
+    chosen[dep]=r%count;
+    r=Math.floor(r/count)
+  }
+  return chosen
+}
+function rowLabel(i, r){
+  if(!dependencies(i).length)return 'Start';
+  return Object.entries(rowSelections(i, r)).map(([k, j])=>'{'+(+k+1)+'} '+doc.positions[k].words[j]).join(' · ')||'Any'
+}
+// Infer one position given the selected words elsewhere in the poem.
+// Eliminate unobserved variables rather than enumerate entire readings.
+// Exact conditional inference by variable elimination.
+function distribution(i){
+  const factors=[];
+  const sizes=doc.positions.map(p=>p.words.length);
+  const read=(f, assignment)=>{
+    let n=0;
+    for(const v of f.vars)n=n*sizes[v]+assignment[v];
+    return f.values[n]
+  };
+  for(let k=0; k<doc.positions.length; k++){
+    const parents=dependencies(k), vars=[...parents, k], values=[];
+    const walk=(depth, assignment)=>{
+      if(depth===vars.length){
+        const word=assignment[k], weights=rowsFor(doc, k)[rowId(k, assignment)];
+        values.push(norm(weights)[word]*(k!==i&&selected[k]!==null&&selected[k]!==word?0:1));
+        return;
+      }
+      const v=vars[depth];
+      for(let j=0; j<sizes[v]; j++){
+        assignment[v]=j;
+        walk(depth+1, assignment)
+      }
+    };
+    walk(0, []);
+    factors.push({
+      vars, values
+    });
+  }
+  const remaining=new Set(sizes.map((_, k)=>k).filter(k=>k!==i));
+  while(remaining.size){
+    // Minimize the size of the next intermediate factor, not the full state space.
+    let chosen=-1, smallest=Infinity;
+    for(const v of remaining){
+      const vars=new Set(factors.filter(f=>f.vars.includes(v)).flatMap(f=>f.vars));
+      vars.delete(v);
+      const size=[...vars].reduce((n, k)=>n*sizes[k], 1);
+      if(size<smallest){
+        smallest=size;
+        chosen=v
+      }
+    }
+    if(smallest>200000)throw Error('Dependencies are too complex to calculate');
+    const taken=factors.filter(f=>f.vars.includes(chosen));
+    const vars=[...new Set(taken.flatMap(f=>f.vars))].filter(v=>v!==chosen).sort((a, b)=>a-b);
+    const values=[], assignment={
+    };
+    const walk=(depth)=>{
+      if(depth===vars.length){
+        let total=0;
+        for(let j=0; j<sizes[chosen]; j++){
+          assignment[chosen]=j;
+          let product=1;
+          for(const f of taken)product*=read(f, assignment);
+          total+=product;
+        }
+        values.push(total);
+        return;
+      }
+      const v=vars[depth];
+      for(let j=0; j<sizes[v]; j++){
+        assignment[v]=j;
+        walk(depth+1)
+      }
+    };
+    walk(0);
+    for(let k=factors.length-1; k>=0; k--)if(factors[k].vars.includes(chosen))factors.splice(k, 1);
+    factors.push({
+      vars, values
+    });
+    remaining.delete(chosen);
+  }
+  const result=sizes[i]&&Array.from({
+    length:sizes[i]
+  }, (_, j)=>{
+    let product=1; for(const f of factors)product*=read(f, {
+      [i]:j
+    }); return product;
+  });
+  const sum=result.reduce((a, b)=>a+b, 0);
+  if (!(sum > 0)) throw new ImpossibleEvidenceError();
+  return result.map(v=>v/sum);
+}
+// Sampling and reader interactions.
+function sampleRow(row){
+  let x=Math.random()*row.reduce((a, b)=>a+b, 0);
+  for(let j=0; j<row.length; j++){
+    x-=row[j];
+    if(x<0)return j
+  }
+  return row.length-1
+}
+function make(tag, cls, content){
+  let e=document.createElement(tag);
+  if(cls)e.className=cls;
+  if(content!==undefined)e.textContent=content;
+  return e
+}
+function renderReader(){
+  const p=$('poem');
+  p.replaceChildren();
+  p.style.whiteSpace='pre-line';
+  let chunks=doc.template.split(/(\{\d+\})/g);
+  for(const chunk of chunks){
+    const m=chunk.match(/^\{(\d+)\}$/);
+    if(!m){
+      p.appendChild(make('span', '', chunk));
+      continue
+    }
+    const i=+m[1]-1;
+    if(i<0||i>=doc.positions.length){
+      p.appendChild(make('span', '', chunk));
+      continue
+    }
+    const b=make('button', 'token'+(active===i?' active':'')+(selected[i]!==null?' locked':''), selected[i]===null?'????':doc.positions[i].words[selected[i]]);
+    b.onmouseenter=()=>activate(i);
+    b.onclick=()=>activate(i);
+    p.appendChild(b)
+  }
+  $('reader-title').textContent=(doc.title||'Untitled').toUpperCase();
+  const author=typeof doc.author==='string'?doc.author.trim():'';
+  $('reader-author').textContent=author?'by '+author:'';
+  $('reader-author').hidden=!author;
+  $('state-label').textContent=selected.filter(x=>x!==null).length+' / '+selected.length+' chosen';
+  if (doc.positions.length) {
+    renderPanel();
+  } else {
+    $('panel-title').textContent = 'No superpositions';
+    $('panel-intro').textContent = '';
+    $('context').textContent = '';
+    $('options').replaceChildren();
+    $('matrix').replaceChildren();
+  }
+}
+function activate(i){
+  if(active===i)return;
+  active=i;
+  renderReader()
+}
+function reconcileLaterChoices(changedAt){
+  for(let k=0; k<selected.length; k++){
+    if(k===changedAt)continue;
+    if(selected[k]===null)continue;
+    let likelihood;
+    try{
+      likelihood=distribution(k)[selected[k]]
+    }catch(e){
+      likelihood=0
+    }
+    if(!(likelihood>1e-12))selected[k]=null;
+  }
+}
+function choose(i, j){
+  selected[i]=selected[i]===j?null:j;
+  reconcileLaterChoices(i);
+  renderReader();
+}
+// Reader sidebar and transition-matrix rendering.
+function renderPanel(){
+  const i=active, p=doc.positions[i], deps=dependencies(i);
+  $('panel-title').textContent='Superposition '+(i+1);
+  $('panel-intro').textContent='';
+  const context = deps.map(parent => selected[parent] === null
+    ? 'position ' + (parent + 1)
+    : '"' + doc.positions[parent].words[selected[parent]] + '"');
+  $('context').textContent = deps.length === 0 ? 'Initial'
+    : deps.length ? 'After ' + context.join(' · ') : 'Independent';
+  let d;
+  try{
+    d=distribution(i)
+  }catch(e){
+    d=p.words.map(()=>0);
+    $('context').textContent=e instanceof ImpossibleEvidenceError ? 'Impossible combination — reset a selection.' : e.message
+  }
+  const g=make('div', 'choicegrid');
+  p.words.forEach((word, j)=>{
+    let b=make('button', 'opt'+(selected[i]===j?' sel':d[j]>=1-1e-9?' forced':'')); b.innerHTML='<strong></strong><span></span><div class="bar"><i></i></div>'; b.querySelector('strong').textContent=word; b.querySelector('span').textContent=d.every(value=>value===0)?'—':(d[j]*100).toFixed(1)+'%'; b.querySelector('i').style.width=d[j]*100+'%'; b.disabled=d[j]===0&&selected[i]!==j; b.onclick=()=>choose(i, j); g.appendChild(b)
+  });
+  $('options').replaceChildren(g);
+  const wrap=$('matrix');
+  const heading=make('div', 'matrix-heading');
+  heading.appendChild(make('div', 'matrix-title', deps.length?'Transition matrix':'Prior distribution'));
+  const viewPicker=make('div', 'matrix-view');
+  viewPicker.setAttribute('role', 'group');
+  viewPicker.setAttribute('aria-label', 'Matrix view');
+  for(const [mode, label] of [['active', 'Active row'], ['full', 'Full matrix']]){
+    const button=make('button', '', label);
+    button.type='button';
+    button.setAttribute('aria-pressed', String(matrixView===mode));
+    button.onclick=()=>{matrixView=mode;renderPanel()};
+    viewPicker.appendChild(button);
+  }
+  heading.appendChild(viewPicker);
+  wrap.replaceChildren(heading);
+  const sc=make('div', 'matrix-scroll'), t=make('table', 'matrix'), head=make('tr');
+  head.appendChild(make('th', '', deps.length?'After':'Initial'));
+  t.appendChild(head);
+  const rows=rowsFor(doc, i);
+  // A later choice can identify the active row even when its prerequisites
+  // haven't been explicitly selected. Cache the posterior for each parent.
+  const parentProbabilities=new Map();
+  for(const parent of deps){
+    if(selected[parent]!==null){
+      parentProbabilities.set(parent, doc.positions[parent].words.map((_, j)=>Number(j===selected[parent])));
+    }else{
+      try{parentProbabilities.set(parent, distribution(parent))}
+      catch(e){parentProbabilities.set(parent, null)}
+    }
+  }
+  const ancestors=new Set();
+  function gatherParents(position){
+    for(const parent of dependencies(position)){
+      if(ancestors.has(parent))continue;
+      ancestors.add(parent);
+      gatherParents(parent)
+    }
+  }
+  gatherParents(i);
+  const forwardParentProbabilities=new Map();
+  let forwardDistribution=null;
+  const savedSelections=selected;
+  try{
+    selected=selected.map((choice, position)=>ancestors.has(position)?choice:null);
+    try{forwardDistribution=distribution(i)}
+    catch(e){forwardDistribution=null}
+    for(const parent of deps){
+      if(selected[parent]!==null){
+        forwardParentProbabilities.set(parent, doc.positions[parent].words.map((_, j)=>Number(j===selected[parent])));
+      }else{
+        try{forwardParentProbabilities.set(parent, distribution(parent))}
+        catch(e){forwardParentProbabilities.set(parent, null)}
+      }
+    }
+  }finally{
+    selected=savedSelections;
+  }
+  const columnIsHighlighted=j=>selected[i]===j || (
+    d[j]>=1-1e-9 && forwardDistribution!==null &&
+    forwardDistribution[j]<1-1e-9
+  );
+  p.words.forEach((word, j)=>{
+    head.appendChild(make('th', columnIsHighlighted(j)?'current-column':'', word));
+  });
+  const forcedRows=rows.map((_, k)=>k).filter(k=>{
+    const entries=Object.entries(rowSelections(i, k));
+    return entries.length>0 && entries.every(([h, v])=>{
+      const posterior=parentProbabilities.get(+h);
+      return posterior && posterior[v]>=1-1e-9;
+    });
+  });
+  const forcedRow=forcedRows.length===1?forcedRows[0]:null;
+  rows.forEach((r, k)=>{
+    const values=rowSelections(i, k);
+    const entries=Object.entries(values);
+    const compatible=entries.every(([h, v])=>selected[+h]===null||selected[+h]===v);
+    const fullyMatched=entries.length>0&&entries.every(([h, v])=>{
+      const posterior=forwardParentProbabilities.get(+h);
+      return posterior&&posterior[v]>=1-1e-9;
+    });
+    // A Bayesian-forced row takes precedence over the ordinary compatibility filter.
+    // Without a single forced row, retain the original Active row behavior.
+    if(matrixView==='active' && (forcedRow!==null ? k!==forcedRow : !compatible))return;
+    const tr=make('tr', fullyMatched?'current-row':'');
+    tr.appendChild(make('th', '', rowLabel(i, k)));
+    norm(r).forEach((v, j)=>{
+      const columnClass=columnIsHighlighted(j)?'current-column':'';
+      const cls=[v===0?'zero':'', columnClass].filter(Boolean).join(' ');
+      const td=make('td', cls, (v*100).toFixed(1)+'%');
+      tr.appendChild(td);
+    });
+    t.appendChild(tr);
+  });
+  sc.appendChild(t);
+  wrap.appendChild(sc)
+}
+$('sample').onclick=()=>{
+  const path=[];
+  for(const i of topologicalOrder(doc)){
+    path[i]=sampleRow(rowsFor(doc, i)[rowId(i, path)])
+  }
+  selected=path;
+  renderReader()
+};
+$('clear').onclick=()=>{
+  reset();
+  active=0;
+  renderReader()
+};
+$('copy').onclick=async()=>{
+  const text=doc.template.replace(/\{(\d+)\}/g, (m, n)=>selected[+n-1]===null?'????':doc.positions[+n-1]?.words[selected[+n-1]]??m);
+  try{
+    await navigator.clipboard.writeText(text);
+    $('copy').textContent='Copied';
+    setTimeout(()=>$('copy').textContent='Copy reading', 1200)
+  }catch(e){
+    prompt('Copy reading', text)
+  }
+};
+renderReader();
+</script>
+ </body>
+</html>
+
