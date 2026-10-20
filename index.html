@@ -94,6 +94,18 @@ h1 {
   background:#eaf3ff;
   color:#1268c6;
 }
+
+.opacity-token {
+  display:inline-grid;
+  vertical-align:middle;
+  place-items:center;
+  background:transparent;
+}
+.opacity-token .alternative {
+  grid-area:1 / 1;
+  white-space:nowrap;
+  pointer-events:none;
+}
 .token.impossible {
   opacity:.5;
 }
@@ -287,6 +299,56 @@ button.action:hover {
   justify-content:space-between;
   gap:20px;
 }
+.toggle-stack {
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+  align-items:flex-end;
+}
+.qol-wrap {
+  display:flex;
+  align-items:center;
+  gap:9px;
+  cursor:pointer;
+  color:#57667a;
+  font-size:13px;
+  white-space:nowrap;
+}
+.qol-wrap input {
+  position:absolute;
+  opacity:0;
+  width:1px;
+  height:1px;
+}
+.qol-track {
+  display:inline-flex;
+  align-items:center;
+  width:36px;
+  height:21px;
+  border-radius:25px;
+  background:#cbd3df;
+  padding:3px;
+  transition:background .16s;
+}
+.qol-track::after {
+  content:"";
+  width:15px;
+  height:15px;
+  background:white;
+  border-radius:50%;
+  transition:transform .16s;
+  box-shadow:0 1px 3px #0002;
+}
+.qol-wrap input:checked+.qol-track {
+  background:#3c74ba;
+}
+.qol-wrap input:checked+.qol-track::after {
+  transform:translateX(15px);
+}
+.qol-wrap input:focus-visible+.qol-track {
+  outline:2px solid #3c74ba;
+  outline-offset:3px;
+}
 .matrix-heading {
   display:flex;
   justify-content:space-between;
@@ -338,6 +400,11 @@ button.action:hover {
   <main class="wrap">
    <div class="heading-row">
     <h1>The Stranger — Showcase</h1>
+    <label class="qol-wrap">
+     Opacity Superpositions
+     <input aria-label="Opacity Superpositions" id="opacity-toggle" type="checkbox"/>
+     <span aria-hidden="true" class="qol-track"></span>
+    </label>
    </div>
    <p class="privacy-subtitle" aria-hidden="true">&nbsp;</p>
    <div id="reader">
@@ -606,6 +673,16 @@ function make(tag, cls, content){
   if(content!==undefined)e.textContent=content;
   return e
 }
+let opacityEnabled=false;
+$('opacity-toggle').onchange=e=>{
+  opacityEnabled=e.target.checked;
+  renderReader();
+};
+
+// no this isn't lazy, regular percentage is the best looking formula
+function wordOpacity(probability){
+  return probability;
+}
 function renderReader(){
   const p=$('poem');
   p.replaceChildren();
@@ -622,7 +699,19 @@ function renderReader(){
       p.appendChild(make('span', '', chunk));
       continue
     }
-    const b=make('button', 'token'+(active===i?' active':'')+(selected[i]!==null?' locked':''), selected[i]===null?'????':doc.positions[i].words[selected[i]]);
+    const unresolved=selected[i]===null;
+    const b=make('button', 'token'+(active===i?' active':'')+(!unresolved?' locked':'')+(opacityEnabled&&unresolved?' opacity-token':''), unresolved?'????':doc.positions[i].words[selected[i]]);
+    if(opacityEnabled&&unresolved){
+      b.textContent='';
+      let probabilities;
+      try{probabilities=distribution(i)}
+      catch(e){probabilities=doc.positions[i].words.map(()=>0)}
+      doc.positions[i].words.forEach((word, j)=>{
+        const alternative=make('span', 'alternative', word);
+        alternative.style.opacity=wordOpacity(probabilities[j]);
+        b.appendChild(alternative);
+      });
+    }
     b.onmouseenter=()=>activate(i);
     b.onclick=()=>activate(i);
     p.appendChild(b)
